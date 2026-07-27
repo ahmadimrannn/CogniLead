@@ -1,0 +1,8 @@
+langgraph
+langchain
+langchain-google-genai
+langsmith
+requests
+pydantic
+python-dotenv
+uvicorn
