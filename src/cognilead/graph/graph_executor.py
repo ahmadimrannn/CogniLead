@@ -7,6 +7,7 @@ def execute_graph(text: str):
   response = graph.invoke(initial_state)
   return response
 
-
 if __name__ == "__main__":
-  execute_graph("yo man, i am a top level guy who runs the whole business of a fintech company (Bankly). around forty to 50 people work in my company. we want a sales lead qualifier.")
+  response = execute_graph("I run a 10-person logistics startup, we need help qualifying inbound freight leads")
+
+  print(response)

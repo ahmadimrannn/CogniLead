@@ -1,1 +1,3 @@
 LLM_MODEL_NAME="gemini-3.1-flash-lite"
+TAVILY_MAX_RESULTS=4
+TAVILY_SEARCH_SEPTH="advanced"
