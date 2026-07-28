@@ -10,5 +10,5 @@ class LeadState(TypedDict):
     lead_score_and_reason: Optional[ScoringNodeSchema]
     review_gate_status: Optional[Literal["accept", "needs_human_review", "reject"]]
     review_status_reason: Optional[str]
-    human_decision: Optional[str]
+    human_decision: Optional[str] = None
     route: str
