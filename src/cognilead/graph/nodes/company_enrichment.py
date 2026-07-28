@@ -8,14 +8,15 @@ def company_enrichment_node(state: LeadState):
   """In detail data extraction of the company."""
 
   extracted_lead_data = state.get('extracted_lead')
-  company_name = extracted_lead_data.company_name
-  company_description = extracted_lead_data.company_description
+  company_name = extracted_lead_data.get('company_name', "")
+  company_description = extracted_lead_data.get('company_description', '')
 
   search_results = search_web(company_name, company_description)
   
   prompt = company_enrichment_node_prompt(company_name, company_description, search_results)
 
-  company_data = company_enrichment_llm.invoke([HumanMessage(content=prompt)])
+  response = company_enrichment_llm.invoke([HumanMessage(content=prompt)])
+  company_data = response.model_dump()
 
   if not company_data:
     return {
@@ -23,5 +24,6 @@ def company_enrichment_node(state: LeadState):
     }
 
   return {
-    "company_data": company_data
+    "company_data": company_data,
+    "route": "lead_scorer"
   }
