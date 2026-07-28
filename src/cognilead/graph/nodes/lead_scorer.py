@@ -12,7 +12,9 @@ def lead_scorer(state: LeadState):
   prompt = lead_scorer_prompt(extracted_lead, extracted_company_data)
   
   response = scorer_llm.invoke([HumanMessage(content=prompt)])
+  lead_score_and_reason = response.model_dump()
 
   return {
-    "lead_score_and_reason": response
+    "lead_score_and_reason": lead_score_and_reason,
+    "route": "human_review_gate"
   }
