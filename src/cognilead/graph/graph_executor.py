@@ -1,13 +1,55 @@
 from graph.graph_builder import graph
+from graph.resume_graph import resume_graph
+import uuid
 
-def execute_graph(text: str):
+def execute_graph(text: str, thread_id: str):
+  config = {
+    "configurable": {
+      "thread_id": thread_id
+    }
+  }
+
   initial_state = {
     "text": text
   }
-  response = graph.invoke(initial_state)
-  return response
+  response = graph.invoke(initial_state, config=config)
+
+  if "__interrupt__" in response:
+    return {
+      "status": "interrupted",
+      "interrupt": response['__interrupt__'][0].value,
+      "thread_id": thread_id
+    }
+  
+  return {
+    "status": "completed",
+    **response
+  }
 
 if __name__ == "__main__":
-  response = execute_graph("I run a 10-person logistics startup, we need help qualifying inbound freight leads")
+    thread_id = str(uuid.uuid4())
 
-  print(response)
+    response = execute_graph("I run a 10-person logistics startup, we need help qualifying inbound freight leads", thread_id)
+    # response = execute_graph("This is Osama, a co-founder from Dezy Solutions, we're looking for lead qualification automation. Our budget is $20,000", thread_id)
+
+    result = response 
+    while result.get("status") == "interrupted":
+        print("\nExecution paused: Human approval required.")
+
+        interrupt_details = result["interrupt"]
+        print(f"Message: {interrupt_details.get('message')}")
+        print(f"Lead Data: {interrupt_details.get('lead_data')}")
+        print(f"Review Status Reason: {interrupt_details.get('review_status_reason')}")
+
+        while True:
+            choice = input("\nChoose an option (approve / reject): ").strip().lower()
+            if choice in {"approve", "reject"}:
+                break
+            print("Invalid choice. Please enter 'approve' or 'reject'.")
+        
+        result = resume_graph(
+            action=choice,
+            thread_id=thread_id
+        )
+
+    print("\nFinal Response:", result)
