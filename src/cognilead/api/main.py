@@ -13,6 +13,7 @@ class LeadProcessRequest(BaseModel):
     description="Raw lead communication text to process",
     examples=["We're a 40-person Series A fintech... can we get a demo?"]
   )
+  email: str
 
 class ResumeRequest(BaseModel):
   thread_id: str
@@ -22,15 +23,17 @@ class ResumeRequest(BaseModel):
 @app.post("/leads")
 def process_leads(request: LeadProcessRequest):
   text = request.lead_text.strip()
-  if not text:
+  email = request.email.strip()
+  
+  if not text or not email.strip():
     raise HTTPException(
       status_code=status.HTTP_400_BAD_REQUEST, 
-      detail="Can't process the lead without the lead details."
+      detail="Can't process the lead without the lead details and the email."
     )
 
   thread_id = str(uuid.uuid4())
   try:
-    response = execute_graph(text, thread_id)
+    response = execute_graph(text, email, thread_id)
     return response
   except Exception as e:
     print(str(e))
@@ -54,7 +57,6 @@ def resume_workflow(request: ResumeRequest):
     result = resume_graph(
       action=request.action,
       thread_id=request.thread_id,
-      edited_query=request.edited_query
     )
 
     return result

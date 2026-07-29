@@ -2,7 +2,7 @@ from graph.graph_builder import graph
 from graph.resume_graph import resume_graph
 import uuid
 
-def execute_graph(text: str, thread_id: str):
+def execute_graph(text: str, email, thread_id: str):
   config = {
     "configurable": {
       "thread_id": thread_id
@@ -10,7 +10,8 @@ def execute_graph(text: str, thread_id: str):
   }
 
   initial_state = {
-    "text": text
+    "text": text,
+    "email": email
   }
   response = graph.invoke(initial_state, config=config)
 
@@ -29,7 +30,7 @@ def execute_graph(text: str, thread_id: str):
 if __name__ == "__main__":
     thread_id = str(uuid.uuid4())
 
-    response = execute_graph("This is ahmad, we want to rule the world. yooo, i am a cs grad looking for a job, please hire meeeeee", thread_id)
+    response = execute_graph("This is ahmad, we want to rule the world. yooo, i am a cs grad looking for a job, please hire meeeeee", "ahmad234@gmail.com", thread_id)
 
     result = response 
     while result.get("status") == "interrupted":
