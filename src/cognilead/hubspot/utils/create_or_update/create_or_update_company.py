@@ -18,12 +18,14 @@ def create_or_update_company(company_name: str, company_domain: str):
     print("company already exists. updating it with new details")
     id = update_company(company_id, company_name, company_domain)
     if id:
+      print("Company updated ✅")
       return id
 
   else:
     print("Creating the company")
     id = create_company(company_name, company_domain)
     if id:
+      print("Company Created ✅")
       return id
 
 

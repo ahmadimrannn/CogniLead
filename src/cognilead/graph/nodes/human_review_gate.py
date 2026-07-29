@@ -41,11 +41,11 @@ def human_review_gate(state: LeadState):
     human_action = None
     if review_gate_status == "accept":
         human_action = None
-        route = "end" # Will update to 'crm_writer' in next phase
+        route = "crm_writer" # Will update to 'crm_writer' in next phase
     elif review_gate_status == "needs_human_review":
         human_action = process_interrupt(state)
         if human_action == "approve":
-            route = "end" # Will update to 'crm_writer' in next phase
+            route = "crm_writer" # Will update to 'crm_writer' in next phase
         else:
             route = "end"
     else: 

@@ -7,3 +7,4 @@ pydantic
 python-dotenv
 uvicorn
 langchain-tavily
+fastapi[standard]

@@ -4,7 +4,7 @@ import requests
 def create_contact(firstname, lastname, email):
   """Query HubSpot CRM to create contact."""
 
-  if not firstname or not email:
+  if not email:
     print("Can't create the contact without details. Please provide the firstname, lastname, and email.")
     return None
 

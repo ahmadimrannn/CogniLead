@@ -9,8 +9,8 @@ def create_or_update_contact(firstname: str, lastname: str, email: str):
       Created or updated contact status
   """
 
-  if not firstname.strip() or not email.strip():
-    print("Can't create or update the contact without firstname, lastname, and email. Please provide name and email.")
+  if not email.strip():
+    print("Can't create or update the contact without email. Please provide email.")
     return None
 
   contact_id = search_contact_by_email(email)
@@ -18,12 +18,14 @@ def create_or_update_contact(firstname: str, lastname: str, email: str):
     print("contact already exists. updating it with new details")
     id = update_contact(contact_id, firstname, lastname, email)
     if id:
+      print("Contact updated ✅")
       return id
 
   else:
     print("Creating the contact")
     id = create_contact(firstname, lastname, email)
     if id:
+      print("Contact created ✅")
       return id
 
 
