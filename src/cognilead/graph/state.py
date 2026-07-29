@@ -2,9 +2,16 @@ from typing import Optional, TypedDict, Literal
 from schemas.extraction_node_schema import ExtractionNodeSchema
 from schemas.company_enrichment_node_schema import CompanyEnrichmentNodeSchema
 from schemas.lead_scorer_schema import ScoringNodeSchema
+from typing_extensions import Annotated
+from langchain_core.messages import BaseMessage
+from langgraph.graph.message import add_messages
 
 class LeadState(TypedDict):
+    messages: Annotated[list, add_messages]
+
+    lead_id: str
     text: str
+    email: str
     extracted_lead: Optional[ExtractionNodeSchema]
     company_data: Optional[CompanyEnrichmentNodeSchema]
     lead_score_and_reason: Optional[ScoringNodeSchema]
