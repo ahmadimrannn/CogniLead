@@ -1,6 +1,6 @@
 from graph.state import LeadState
 from config.llm import scorer_llm
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, AIMessage
 from prompts.prompts import lead_scorer_prompt
 
 def lead_scorer(state: LeadState):
@@ -14,7 +14,19 @@ def lead_scorer(state: LeadState):
   response = scorer_llm.invoke([HumanMessage(content=prompt)])
   lead_score_and_reason = response.model_dump()
 
+  agent_message = f"""
+    📊 Lead Scorer Agent completed.
+
+    Lead ID: {state['lead_id']}
+    Assigned Score: {lead_score_and_reason['score']}/10
+    Enrichment Signal Used: {extracted_company_data['enrichment_status']}
+    Scoring Explanation: {lead_score_and_reason['reason']}
+
+    Next -> Human Review Gate
+    """
+
   return {
+    "messages": [AIMessage(content=agent_message)],
     "lead_score_and_reason": lead_score_and_reason,
     "route": "human_review_gate"
   }

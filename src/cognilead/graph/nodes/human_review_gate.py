@@ -1,6 +1,7 @@
 from graph.state import LeadState
 from langgraph.types import interrupt
 from evaluators.lead_evaluator_for_human_approval import evaluate_lead
+from langchain_core.messages import AIMessage
 
 def process_interrupt(state: LeadState):
     extracted_lead = state.get("extracted_lead")
@@ -36,6 +37,8 @@ def human_review_gate(state: LeadState):
 
     review_gate_status, review_status_reason = evaluate_lead(state)
 
+    route = ""
+    human_action = None
     if review_gate_status == "accept":
         human_action = None
         route = "end" # Will update to 'crm_writer' in next phase
@@ -49,7 +52,20 @@ def human_review_gate(state: LeadState):
         route = "end"
         human_action = None
 
+    agent_message = f"""
+    🛡️ Human Review Gate completed.
+
+    Lead ID: {state['lead_id']}
+    Evaluation Outcome: {review_gate_status.upper()}
+    Evaluation Reason: {review_status_reason}
+    Human Action Taken: {human_action}
+    Routing Signal: {route.upper()}
+
+    Next -> End of Workflow
+    """
+
     return {
+        "messages": [AIMessage(content=agent_message)],
         "review_gate_status": review_gate_status,
         "review_status_reason": review_status_reason,
         "human_decision": human_action,
