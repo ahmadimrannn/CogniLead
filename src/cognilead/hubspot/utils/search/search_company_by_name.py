@@ -9,7 +9,7 @@ def search_company_by_name(company_name):
       None: If company does not exist or query fails.
   """
 
-  if not company_name or not company_name.strip():
+  if not company_name:
     return None
 
   url = f"https://api.hubapi.com/crm/objects/2026-03/companies/search"
@@ -21,7 +21,7 @@ def search_company_by_name(company_name):
                 {
                     "propertyName": "name",
                     "operator": "EQ",
-                    "value": company_name.strip()
+                    "value": company_name
                 }
             ]
         }

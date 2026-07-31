@@ -9,7 +9,7 @@ def create_or_update_company(company_name: str, company_domain: str):
       Created or updated company id
   """
 
-  if not company_name.strip():
+  if not company_name:
     print("Can't create or update the company without company name. Please provide these details.")
     return None
 
