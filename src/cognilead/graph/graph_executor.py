@@ -30,7 +30,7 @@ def execute_graph(text: str, email, thread_id: str):
 if __name__ == "__main__":
     thread_id = str(uuid.uuid4())
 
-    response = execute_graph("Hi, I'm the Director of Sales at Canopy Management. We're a 500+ person productivity software company and we're evaluating tools to automate our inbound lead scoring. Budget is approved for this quarter, just need to pick a vendor. Can we set up a call this week?", "director.sales@canopy.so", thread_id)
+    response = execute_graph("Hi, I'm the operations manager at Summit Group. We're a small consulting firm, about 12 people, and we're looking for a way to automate how we screen inbound client inquiries.", "ops@summitgroupconsulting.co", thread_id)
 
     result = response 
     while result.get("status") == "interrupted":

@@ -8,6 +8,7 @@ from graph.nodes.company_enrichment import company_enrichment_node
 from graph.nodes.lead_scorer import lead_scorer
 from graph.nodes.human_review_gate import human_review_gate 
 from graph.nodes.crm_writer import crm_writer
+from graph.nodes.crm_retry import crm_retrier
 
 from langgraph.checkpoint.memory import MemorySaver
 
@@ -32,6 +33,7 @@ def build_graph():
   graph.add_node("lead_scorer", lead_scorer)
   graph.add_node("human_review_gate", human_review_gate)
   graph.add_node("crm_writer", crm_writer)
+  graph.add_node("crm_retrier", crm_retrier)
 
   # Add edges in the graph to connect nodes or define the flow
   graph.add_edge(START, "lead_extractor")
@@ -46,7 +48,22 @@ def build_graph():
       "end": END
     }
   )
-  graph.add_edge("crm_writer", END)
+  graph.add_conditional_edges(
+    "crm_writer",
+    select_route,
+    {
+      "crm_retrier": "crm_retrier",
+      "end": END
+    }
+  )
+  graph.add_conditional_edges(
+    "crm_retrier",
+    select_route, 
+    {
+      "crm_writer": "crm_writer",
+      "end": END
+    } 
+  )
 
   final_graph = graph.compile(checkpointer=memory)
 
