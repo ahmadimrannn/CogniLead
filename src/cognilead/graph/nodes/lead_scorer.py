@@ -23,7 +23,12 @@ def lead_scorer(state: LeadState):
     Scoring Explanation: {lead_score_and_reason['reason']}
 
     Next -> Human Review Gate
-    """
+  """
+
+  if lead_score_and_reason:
+    print("✅ Lead Score and Reason Completed.")
+  else:
+    print("❌ Lead Score and Reason Failed.")
 
   return {
     "messages": [agent_message],

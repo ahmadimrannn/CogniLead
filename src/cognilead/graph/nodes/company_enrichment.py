@@ -32,7 +32,13 @@ def company_enrichment_node(state: LeadState):
     Industry: {company_data.get('industry') or 'N/A'}
 
     Next -> Lead Scorer
-    """
+  """
+
+  if company_data:
+    print("✅ Company Enrichment Completed.")
+  else:
+    print("❌ Company Enrichment Failed.")
+
 
   return {
     "messages": [agent_message],
