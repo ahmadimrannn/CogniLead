@@ -15,7 +15,7 @@ def create_or_update_contact(firstname: str, lastname: str, email: str):
 
   contact_id = search_contact_by_email(email)
   if contact_id:
-    print("contact already exists. updating it with new details")
+    print("Contact already exists. Updating it with new details")
     id = update_contact(contact_id, firstname, lastname, email)
     if id:
       print("Contact updated ✅")

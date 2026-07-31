@@ -15,7 +15,7 @@ def create_or_update_company(company_name: str, company_domain: str):
 
   company_id = search_company_by_name(company_name)
   if company_id:
-    print("company already exists. updating it with new details")
+    print("Company already exists. Updating it with new details")
     id = update_company(company_id, company_name, company_domain)
     if id:
       print("Company updated ✅")
