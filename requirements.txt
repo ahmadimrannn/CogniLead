@@ -8,3 +8,8 @@ python-dotenv
 uvicorn
 langchain-tavily
 fastapi[standard]
+langgraph-checkpoint-postgres 
+psycopg[binary] 
+psycopg-pool
+sqlalchemy 
+psycopg2-binary
