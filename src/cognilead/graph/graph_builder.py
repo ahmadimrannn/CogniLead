@@ -10,9 +10,9 @@ from graph.nodes.human_review_gate import human_review_gate
 from graph.nodes.crm_writer import crm_writer
 from graph.nodes.crm_retry import crm_retrier
 
-from langgraph.checkpoint.memory import MemorySaver
-
 from utils.router import select_route
+
+from database.config import checkpointer
 
 # Register custom Pydantic schema classes for MsgPack deserialization
 os.environ["LANGGRAPH_ALLOWED_MSGPACK_MODULES"] = (
@@ -24,8 +24,6 @@ os.environ["LANGGRAPH_ALLOWED_MSGPACK_MODULES"] = (
 def build_graph():
   # Initializing the graph
   graph = StateGraph(LeadState)
-
-  memory = MemorySaver()
 
   # Add nodes in the graph
   graph.add_node("lead_extractor", lead_extractor)
@@ -65,7 +63,7 @@ def build_graph():
     } 
   )
 
-  final_graph = graph.compile(checkpointer=memory)
+  final_graph = graph.compile(checkpointer=checkpointer)
 
   return final_graph
 
