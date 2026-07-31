@@ -1,8 +1,8 @@
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, status, Query
 from graph.graph_executor import execute_graph
 from graph.resume_graph import resume_graph
 from pydantic import BaseModel, Field
-import uuid
+from database.utils.get_db import get_db_connection
 
 app = FastAPI(title="Lead Qualification API")
 
@@ -19,6 +19,9 @@ class ResumeRequest(BaseModel):
   thread_id: str
   action: str
 
+class FailedLeadRequest(BaseModel):
+  limit: int = Query(default=50, ge=1, le=1000)
+
 
 @app.post("/leads")
 def process_leads(request: LeadProcessRequest):
@@ -31,9 +34,8 @@ def process_leads(request: LeadProcessRequest):
       detail="Can't process the lead without the lead details and the email."
     )
 
-  thread_id = str(uuid.uuid4())
   try:
-    response = execute_graph(text, email, thread_id)
+    response = execute_graph(text, email)
     return response
   except Exception as e:
     print(str(e))
@@ -67,6 +69,56 @@ def resume_workflow(request: ResumeRequest):
       status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
       detail=f"Can't fetch results."
     )
-  
-  
 
+
+
+@app.get("/leads/failed")
+def get_failed_leads(request: FailedLeadRequest):
+  """
+  Retrieves all lead records that ended up in 'failed_permanent' status.
+  Direct SQL query against PostgreSQL checkpoints JSON data.
+  """
+  sql_query = """
+    SELECT 
+        thread_id,
+        checkpoint->'channel_values'->>'lead_id' AS lead_id,
+        checkpoint->'channel_values'->>'email' AS email,
+        checkpoint->'channel_values'->>'crm_write_status' AS crm_write_status,
+        checkpoint->'channel_values'->>'review_status_reason' AS failure_reason,
+        checkpoint->>'ts' AS timestamp
+    FROM checkpoints
+    WHERE 
+        checkpoint->'channel_values'->>'crm_write_status' = 'failed_permanent'
+        OR checkpoint->'channel_values'->>'route' = 'failed_permanent'
+    ORDER BY checkpoint->>'ts' DESC
+    LIMIT %s;
+  """
+
+  try:
+    with get_db_connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(sql_query, (request.limit,))
+            results = cursor.fetchall()
+
+    failed_leads = [
+      {
+        "thread_id": row["lead_id"],
+        "lead_id": row["lead_id"],
+        "email": row["email"],
+        "status": row["crm_write_status"] or "failed_permanent",
+        "failure_reason": row["lead_score_and_reason"]['reason'],
+      }
+      for row in results
+    ]
+
+    return {
+      "status": "success",
+      "count": len(failed_leads),
+      "failed_leads": failed_leads
+    }
+
+  except Exception as e:
+    raise HTTPException(
+      status_code=500, 
+      detail=f"Database query failed: {str(e)}"
+  )
