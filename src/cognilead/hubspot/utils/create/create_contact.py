@@ -31,9 +31,14 @@ def create_contact(firstname, lastname, email):
     if id:
       return id
 
+  except requests.exceptions.HTTPError as e:
+        print(f"HubSpot HTTP Error: {e.response.status_code}")
+        print(f"HubSpot Details: {e.response.text}") 
+        return None
+        
   except requests.exceptions.RequestException as e:
-    print(f"HubSpot API Error while creating the contact, Error: {str(e)}")
-    return None
+        print(f"Network Error while creating the contact: {str(e)}")
+        return None
 
 
 if __name__ == "__main__":
