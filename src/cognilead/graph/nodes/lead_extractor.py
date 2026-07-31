@@ -27,7 +27,7 @@ def lead_extractor(state: LeadState):
 
 
   return {
-    "messages": [AIMessage(content=agent_message)],
+    "messages": [agent_message],
     "extracted_lead": extracted_lead,
     "lead_id": lead_id,
     "email": email,

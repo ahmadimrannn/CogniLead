@@ -35,7 +35,7 @@ def company_enrichment_node(state: LeadState):
     """
 
   return {
-    "messages": [AIMessage(content=agent_message)],
+    "messages": [agent_message],
     "company_data": company_data,
     "route": "lead_scorer"
   }

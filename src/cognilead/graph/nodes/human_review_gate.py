@@ -65,7 +65,7 @@ def human_review_gate(state: LeadState):
     """
 
     return {
-        "messages": [AIMessage(content=agent_message)],
+        "messages": [agent_message],
         "review_gate_status": review_gate_status,
         "review_status_reason": review_status_reason,
         "human_decision": human_action,

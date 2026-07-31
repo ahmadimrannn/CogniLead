@@ -26,7 +26,7 @@ def lead_scorer(state: LeadState):
     """
 
   return {
-    "messages": [AIMessage(content=agent_message)],
+    "messages": [agent_message],
     "lead_score_and_reason": lead_score_and_reason,
     "route": "human_review_gate"
   }
