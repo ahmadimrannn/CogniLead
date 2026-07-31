@@ -22,7 +22,13 @@ class LeadState(TypedDict):
     review_gate_status: Optional[Literal["accept", "needs_human_review", "reject"]]
     review_status_reason: Optional[str]
     human_decision: Optional[str] = None
-    
+
+    crm_retry_attempt: int 
+    contact_id: str
+    company_id: str
+    associated: bool
+    note: str
+    note_written: bool
     crm_write_status: str
 
     route: str
