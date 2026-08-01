@@ -1,8 +1,15 @@
+from pathlib import Path
+import sys
+
+# Add src/ directory to Python path
+sys.path.append(str(Path(__file__).resolve().parent.parent.parent))
+
 from fastapi import FastAPI, HTTPException, status, Query
 from graph.graph_executor import execute_graph
 from graph.resume_graph import resume_graph
 from pydantic import BaseModel, Field
 from database.utils.get_db import get_db_connection
+
 
 app = FastAPI(title="Lead Qualification API")
 
