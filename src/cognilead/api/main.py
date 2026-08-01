@@ -1,8 +1,10 @@
 from pathlib import Path
 import sys
 
-# Add src/ directory to Python path
-sys.path.append(str(Path(__file__).resolve().parent.parent.parent))
+# Add src/cognilead/ to sys.path so 'graph' and other modules resolve
+cognilead_dir = Path(__file__).resolve().parent.parent
+if str(cognilead_dir) not in sys.path:
+    sys.path.insert(0, str(cognilead_dir))
 
 from fastapi import FastAPI, HTTPException, status, Query
 from graph.graph_executor import execute_graph
