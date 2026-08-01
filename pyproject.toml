@@ -23,4 +23,4 @@ dependencies = [
     "uvicorn>=0.51.0",
 ]
 [tool.vercel]
-entrypoint = "src/cognilead/api/main.py"
+entrypoint = "src.cognilead.api.main:app"
