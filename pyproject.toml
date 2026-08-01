@@ -3,7 +3,7 @@ name = "lead-qualifier-project"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 dependencies = [
     "email-validator>=2.3.0",
     "fastapi[standard]>=0.141.1",
