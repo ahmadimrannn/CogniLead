@@ -11,6 +11,7 @@ from graph.graph_executor import execute_graph
 from graph.resume_graph import resume_graph
 from pydantic import BaseModel, Field
 from database.utils.get_db import get_db_connection
+from api.event_logger import log_event
 
 
 app = FastAPI(title="Lead Qualification API")
@@ -47,7 +48,11 @@ def process_leads(request: LeadProcessRequest):
     response = execute_graph(text, email)
     return response
   except Exception as e:
-    print(str(e))
+    log_event(
+      service="cognilead", event_type="api_exception", severity="error",
+      node_or_route="/leads", message=str(e),
+      context={"lead_text_len": len(text), "email": email},
+    )
     raise HTTPException(
       status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
       detail=f"Failed to process the lead due to some internal error."
@@ -73,7 +78,11 @@ def resume_workflow(request: ResumeRequest):
     return result
 
   except Exception as e:
-    print(str(e))
+    log_event(
+      service="cognilead", event_type="api_exception", severity="error",
+      node_or_route="/leads/resume", message=str(e),
+      context={"thread_id": request.thread_id, "action": request.action},
+    )
     raise HTTPException(
       status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
       detail=f"Can't fetch results."
@@ -127,6 +136,11 @@ def get_failed_leads(request: FailedLeadRequest):
     }
 
   except Exception as e:
+    log_event(
+      service="cognilead", event_type="api_exception", severity="error",
+      node_or_route="/leads/failed", message=str(e),
+      context={"limit": request.limit},
+    )
     raise HTTPException(
       status_code=500, 
       detail=f"Database query failed: {str(e)}"

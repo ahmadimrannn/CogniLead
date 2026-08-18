@@ -1,0 +1,28 @@
+import json
+import traceback
+import psycopg2
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+DB_DSN = os.getenv("DB_URI_FOR_LOGS")
+
+def log_event(service: str, event_type: str, message: str,
+              severity: str = "error", node_or_route: str | None = None,
+              thread_id: str | None = None, context: dict | None = None):
+    try:
+      conn = psycopg2.connect(DB_DSN)
+      with conn, conn.cursor() as cur:
+        cur.execute(
+          """
+          INSERT INTO events (service, event_type, severity, node_or_route,
+                                thread_id, message, context, source)
+          VALUES (%s, %s, %s, %s, %s, %s, %s, 'app_shim')
+          """,
+          (service, event_type, severity, node_or_route, thread_id,
+            message, json.dumps(context or {}))
+        )
+      conn.close()
+    except Exception:
+      print(f"[events_logger] failed to log event: {traceback.format_exc()}")
