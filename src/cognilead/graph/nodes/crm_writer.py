@@ -1,7 +1,7 @@
 from textwrap import dedent
 from graph.state import LeadState
 from utils.crm_utils import ensure_company, ensure_contact, ensure_association, ensure_note, decide_route, build_note
-
+from api.event_logger import log_event
 
 
 def crm_writer(state: LeadState):
@@ -43,6 +43,26 @@ def crm_writer(state: LeadState):
     except Exception as e:
         print(f"Failed to write in CRM. Error: {str(e)}")
         crm_write_status = "failed"
+        log_event(
+            service="cognilead",
+            event_type="crm_write_exception",
+            severity="error",
+            node_or_route="crm_writer",
+            thread_id=lead_id,
+            message=str(e),
+            context={"email": email, "company_name": company_name, "crm_retry_attempt": crm_retry_attempt},
+        )
+
+    if crm_write_status != "succeeded":
+        log_event(
+            service="cognilead",
+            event_type="crm_write_failed",
+            severity="warning",
+            node_or_route="crm_writer",
+            thread_id=lead_id,
+            message="CRM write did not succeed.",
+            context={"crm_write_status": crm_write_status, "crm_retry_attempt": crm_retry_attempt},
+        )
 
     route = decide_route(crm_write_status, crm_retry_attempt)
 

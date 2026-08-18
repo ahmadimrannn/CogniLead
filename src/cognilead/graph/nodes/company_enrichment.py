@@ -1,8 +1,9 @@
-from langchain_core.messages import HumanMessage, AIMessage
+from langchain_core.messages import HumanMessage
 from graph.state import LeadState
 from config.llm import company_enrichment_llm
 from utils.web_search import search_web
 from prompts.prompts import company_enrichment_node_prompt
+from api.event_logger import log_event
 
 def company_enrichment_node(state: LeadState):
   """In detail data extraction of the company."""
@@ -19,6 +20,13 @@ def company_enrichment_node(state: LeadState):
   company_data = response.model_dump()
 
   if not company_data:
+    log_event(
+      service="cognilead", event_type="company_enrichment_failure", severity="warning",
+      node_or_route="company_enrichment",
+      thread_id=state.get("lead_id"),
+      message="Company enrichment returned no usable data.",
+      context={"company_name": company_name, "company_description": company_description},
+    )
     return {
       "company_data": None
     }

@@ -11,6 +11,10 @@ DB_DSN = os.getenv("DB_URI_FOR_LOGS")
 def log_event(service: str, event_type: str, message: str,
               severity: str = "error", node_or_route: str | None = None,
               thread_id: str | None = None, context: dict | None = None):
+    if not DB_DSN:
+      print("[events_logger] DB_URI_FOR_LOGS is not configured; skipping event logging.")
+      return
+
     try:
       conn = psycopg2.connect(DB_DSN)
       with conn, conn.cursor() as cur:

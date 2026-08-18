@@ -2,7 +2,8 @@ from graph.state import LeadState
 from config.llm import extractor_llm
 from langchain_core.messages import HumanMessage, AIMessage
 from prompts.prompts import lead_extractor_prompt
-import uuid
+from api.event_logger import log_event
+
 
 def lead_extractor(state: LeadState):
   """Takes messy text and then extracts lead data from it"""
@@ -12,8 +13,20 @@ def lead_extractor(state: LeadState):
   email = state['email']
   prompt = lead_extractor_prompt(data)
 
-  response = extractor_llm.invoke([HumanMessage(content=prompt)])
-  extracted_lead = response.model_dump()
+  try:
+    response = extractor_llm.invoke([HumanMessage(content=prompt)])
+    extracted_lead = response.model_dump()
+  except Exception as exc:
+    log_event(
+      service="cognilead",
+      event_type="lead_extraction_exception",
+      severity="critical",
+      node_or_route="lead_extractor",
+      thread_id=lead_id,
+      message=str(exc),
+      context={"lead_text_length": len(data), "email": email},
+    )
+    raise
 
   agent_message = f"""
     🔍 Lead Extractor Agent completed.
@@ -28,7 +41,6 @@ def lead_extractor(state: LeadState):
     print("✅ Lead Extraction Completed.")
   else:
     print("❌ Lead Extraction Failed.")
-
 
   return {
     "messages": [agent_message],

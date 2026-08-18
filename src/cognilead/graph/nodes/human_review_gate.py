@@ -1,7 +1,7 @@
 from graph.state import LeadState
 from langgraph.types import interrupt
 from evaluators.lead_evaluator_for_human_approval import evaluate_lead
-from langchain_core.messages import AIMessage
+
 
 def process_interrupt(state: LeadState):
     extracted_lead = state.get("extracted_lead")
@@ -32,10 +32,12 @@ def process_interrupt(state: LeadState):
         return approval.get("action")
     return approval
 
+
 def human_review_gate(state: LeadState):
     """Asks for human review in ambiguous cases or routes accepted/rejected leads."""
 
     review_gate_status, review_status_reason = evaluate_lead(state)
+    lead_id = state.get("lead_id")
 
     route = ""
     human_action = None
