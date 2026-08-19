@@ -12,6 +12,7 @@ from graph.resume_graph import resume_graph
 from pydantic import BaseModel, Field
 from database.utils.get_db import get_db_connection
 from api.event_logger import log_event
+from database.config import pool
 
 
 app = FastAPI(title="Lead Qualification API")
@@ -32,6 +33,17 @@ class ResumeRequest(BaseModel):
 class FailedLeadRequest(BaseModel):
   limit: int = Query(default=50, ge=1, le=1000)
 
+@app.get("/health")
+def health_check():
+  try:
+    with pool.connection() as conn:
+      conn.execute("SELECT 1")
+    return {
+      "status": "ok",
+      "db": "reachable"
+    }
+  except Exception as e:
+    raise HTTPException(status_code=503, detail=f"db unreachable: {str(e)}")
 
 @app.post("/leads")
 def process_leads(request: LeadProcessRequest):
