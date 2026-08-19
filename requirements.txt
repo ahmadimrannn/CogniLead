@@ -13,4 +13,3 @@ psycopg[binary]
 psycopg-pool
 sqlalchemy 
 psycopg2-binary
-psycopg2
