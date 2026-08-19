@@ -1,6 +1,6 @@
 import json
 import traceback
-import psycopg2
+import psycopg
 import os
 from dotenv import load_dotenv
 
@@ -16,16 +16,16 @@ def log_event(service: str, event_type: str, message: str,
       return
 
     try:
-      conn = psycopg2.connect(DB_DSN)
-      with conn, conn.cursor() as cur:
-        cur.execute(
-          """
-          INSERT INTO events (service, event_type, severity, node_or_route,
-                                thread_id, message, context, source)
-          VALUES (%s, %s, %s, %s, %s, %s, %s, 'app_shim')
-          """,
-          (service, event_type, severity, node_or_route, thread_id,
-            message, json.dumps(context or {}))
+      with psycopg.connect(DB_DSN) as conn:
+        with conn, conn.cursor() as cur:
+          cur.execute(
+            """
+            INSERT INTO events (service, event_type, severity, node_or_route,
+                                  thread_id, message, context, source)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, 'app_shim')
+            """,
+            (service, event_type, severity, node_or_route, thread_id,
+              message, json.dumps(context or {}))
         )
       conn.close()
     except Exception:

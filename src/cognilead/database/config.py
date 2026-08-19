@@ -9,18 +9,20 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Retrieve PostgreSQL database connection URI from environment
-DB_URI = os.getenv("DB_URI", "postgresql://postgres:postgres@localhost:5432/lead_db")
+DB_URI = os.getenv("DB_URI")
 
 # Initialize PostgreSQL Connection Pool
 pool = ConnectionPool(
   conninfo=DB_URI,
   max_size=10,
+  max_idle=240,
   kwargs={
       "autocommit": True,
       "prepare_threshold": 0,
       "row_factory": dict_row,
   },
 )
+
 # Initialize LangGraph Postgres Checkpointer
 checkpointer = PostgresSaver(pool, serde=JsonPlusSerializer())
 
