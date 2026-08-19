@@ -15,7 +15,7 @@ DB_URI = os.getenv("DB_URI")
 pool = ConnectionPool(
   conninfo=DB_URI,
   max_size=10,
-  max_idle=240,
+  max_idle=180,
   kwargs={
       "autocommit": True,
       "prepare_threshold": 0,
