@@ -12,6 +12,10 @@ def resume_graph(
     }
   }
 
+  existing_state = graph.get_state(config)
+  if not existing_state.values:
+      raise ValueError(f"No paused investigation found for thread_id={thread_id}")
+
   payload = {
     "action": action
   }
