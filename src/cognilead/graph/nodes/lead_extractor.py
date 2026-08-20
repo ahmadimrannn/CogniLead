@@ -8,9 +8,9 @@ from api.event_logger import log_event
 def lead_extractor(state: LeadState):
   """Takes messy text and then extracts lead data from it"""
 
-  data = state['text']
-  lead_id = state['lead_id']
-  email = state['email']
+  data = state.get("text")
+  lead_id = state.get("lead_id")
+  email = state.get('email')
   prompt = lead_extractor_prompt(data)
 
   try:
