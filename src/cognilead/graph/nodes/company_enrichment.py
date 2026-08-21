@@ -14,6 +14,16 @@ def company_enrichment_node(state: LeadState):
 
   search_results = search_web(company_name, company_description)
   
+  log_event(
+    service="cognilead",
+    event_type="company_enrichment_started",
+    severity="info",
+    node_or_route="company_enrichment",
+    thread_id=state.get("lead_id"),
+    message="Company enrichment started.",
+    context={"company_name": company_name, "search_result_count": len(search_results) if isinstance(search_results, list) else 0},
+  )
+
   prompt = company_enrichment_node_prompt(company_name, company_description, search_results)
 
   response = company_enrichment_llm.invoke([HumanMessage(content=prompt)])
@@ -43,6 +53,15 @@ def company_enrichment_node(state: LeadState):
   """
 
   if company_data:
+    log_event(
+      service="cognilead",
+      event_type="company_enrichment_completed",
+      severity="info",
+      node_or_route="company_enrichment",
+      thread_id=state.get("lead_id"),
+      message="Company enrichment completed successfully.",
+      context={"company_name": company_name, "industry": company_data.get("industry"), "enrichment_status": company_data.get("enrichment_status")},
+    )
     print("✅ Company Enrichment Completed.")
   else:
     print("❌ Company Enrichment Failed.")

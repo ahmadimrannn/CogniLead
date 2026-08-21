@@ -12,6 +12,16 @@ def lead_scorer(state: LeadState):
   extracted_company_data = state.get('company_data', '')
   lead_id = state.get('lead_id')
 
+  log_event(
+    service="cognilead",
+    event_type="lead_scoring_started",
+    severity="info",
+    node_or_route="lead_scorer",
+    thread_id=lead_id,
+    message="Lead scoring started.",
+    context={"lead_id": lead_id, "company_enrichment_status": extracted_company_data.get('enrichment_status') if isinstance(extracted_company_data, dict) else None},
+  )
+
   try:
     prompt = lead_scorer_prompt(extracted_lead, extracted_company_data)
     response = scorer_llm.invoke([HumanMessage(content=prompt)])
@@ -40,6 +50,15 @@ def lead_scorer(state: LeadState):
   """
 
   if lead_score_and_reason:
+    log_event(
+      service="cognilead",
+      event_type="lead_scoring_completed",
+      severity="info",
+      node_or_route="lead_scorer",
+      thread_id=lead_id,
+      message="Lead scoring completed successfully.",
+      context={"lead_id": lead_id, "score": lead_score_and_reason.get('score'), "reason": lead_score_and_reason.get('reason')},
+    )
     print("✅ Lead Score and Reason Completed.")
   else:
     print("❌ Lead Score and Reason Failed.")

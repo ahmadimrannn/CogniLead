@@ -13,6 +13,16 @@ def lead_extractor(state: LeadState):
   email = state.get('email')
   prompt = lead_extractor_prompt(data)
 
+  log_event(
+    service="cognilead",
+    event_type="lead_extractor_started",
+    severity="info",
+    node_or_route="lead_extractor",
+    thread_id=lead_id,
+    message="Lead extraction started.",
+    context={"lead_text_length": len(data), "email": email},
+  )
+
   try:
     response = extractor_llm.invoke([HumanMessage(content=prompt)])
     extracted_lead = response.model_dump()
@@ -38,8 +48,26 @@ def lead_extractor(state: LeadState):
     """
 
   if extracted_lead:
+    log_event(
+      service="cognilead",
+      event_type="lead_extractor_completed",
+      severity="info",
+      node_or_route="lead_extractor",
+      thread_id=lead_id,
+      message="Lead extraction completed successfully.",
+      context={"lead_text_length": len(data), "email": email, "keys": list(extracted_lead.keys())[:10]},
+    )
     print("✅ Lead Extraction Completed.")
   else:
+    log_event(
+      service="cognilead",
+      event_type="lead_extraction_failure",
+      severity="critical",
+      node_or_route="lead_extractor",
+      thread_id=lead_id,
+      message="Lead extraction returned no usable data.",
+      context={"lead_text_length": len(data), "email": email},
+    )
     print("❌ Lead Extraction Failed.")
 
   return {

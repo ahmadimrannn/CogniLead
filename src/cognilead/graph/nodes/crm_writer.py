@@ -29,6 +29,16 @@ def crm_writer(state: LeadState):
 
     note = build_note(score, reason, lead_id, has_company, enrichment_status, name_match_confidence)
 
+    log_event(
+        service="cognilead",
+        event_type="crm_write_started",
+        severity="info",
+        node_or_route="crm_writer",
+        thread_id=lead_id,
+        message="CRM write process started.",
+        context={"email": email, "company_name": company_name, "crm_retry_attempt": crm_retry_attempt},
+    )
+
     company_id = state.get("company_id")
     contact_id = state.get("contact_id")
     is_associated = state.get("associated", False)
@@ -62,6 +72,17 @@ def crm_writer(state: LeadState):
             thread_id=lead_id,
             message="CRM write did not succeed.",
             context={"crm_write_status": crm_write_status, "crm_retry_attempt": crm_retry_attempt},
+        )
+
+    if crm_write_status == "succeeded":
+        log_event(
+            service="cognilead",
+            event_type="crm_write_completed",
+            severity="info",
+            node_or_route="crm_writer",
+            thread_id=lead_id,
+            message="CRM write completed successfully.",
+            context={"crm_write_status": crm_write_status, "company_id": company_id, "contact_id": contact_id, "crm_retry_attempt": crm_retry_attempt},
         )
 
     route = decide_route(crm_write_status, crm_retry_attempt)

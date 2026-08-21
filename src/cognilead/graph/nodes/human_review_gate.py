@@ -1,6 +1,7 @@
 from graph.state import LeadState
 from langgraph.types import interrupt
 from evaluators.lead_evaluator_for_human_approval import evaluate_lead
+from api.event_logger import log_event
 
 
 def process_interrupt(state: LeadState):
@@ -39,6 +40,16 @@ def human_review_gate(state: LeadState):
     review_gate_status, review_status_reason = evaluate_lead(state)
     lead_id = state.get("lead_id")
 
+    log_event(
+        service="cognilead",
+        event_type="human_review_gate_started",
+        severity="info",
+        node_or_route="human_review_gate",
+        thread_id=lead_id,
+        message="Human review gate evaluation started.",
+        context={"lead_id": lead_id, "review_gate_status": review_gate_status},
+    )
+
     route = ""
     human_action = None
     if review_gate_status == "accept":
@@ -53,6 +64,16 @@ def human_review_gate(state: LeadState):
     else: 
         route = "end"
         human_action = None
+
+    log_event(
+        service="cognilead",
+        event_type="human_review_decision",
+        severity="info" if review_gate_status in {"accept", "needs_human_review"} else "warning",
+        node_or_route="human_review_gate",
+        thread_id=lead_id,
+        message=f"Review gate result: {review_gate_status}",
+        context={"review_gate_status": review_gate_status, "review_status_reason": review_status_reason, "human_action": human_action, "route": route},
+    )
 
     agent_message = f"""
     🛡️ Human Review Gate completed.
