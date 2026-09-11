@@ -2,7 +2,7 @@ import os
 import json
 import threading
 import requests
-from config.settings import AUTO_TRIGGER_SEVERITIES, SENTRYLOOP_INTERNAL_INVOKE_URL, SKIP_AUTO_TRIGGER_FOR, INTERNAL_TRIGGER_SECRET, MAX_TRIGGERS_PER_HOUR, COOLDOWN_MINUTES
+from config.settings import AUTO_TRIGGER_SEVERITIES, SENTRYLOOP_INTERNAL_INVOKE_URL, SKIP_AUTO_TRIGGER_FOR, MAX_TRIGGERS_PER_HOUR, COOLDOWN_MINUTES
 
 def maybe_trigger_investigation(conn, service: str, severity: str, node_or_route: str | None, event_type: str = "", message: str = "", context: dict | None = None):
 
@@ -81,15 +81,21 @@ def _build_incident_text(service: str, severity: str, node_or_route: str, event_
 
 
 def _fire_investigation(service: str, incident_text: str):
+
+    internal_secret = os.getenv("INTERNAL_TRIGGER_SECRET")
     def _send():
         try:
-            requests.post(
+            response = requests.post(
                 SENTRYLOOP_INTERNAL_INVOKE_URL,
                 json={"incident": incident_text, "service": service},
-                headers={"Authorization": f"Bearer {INTERNAL_TRIGGER_SECRET}"},
+                headers={"Authorization": f"Bearer {internal_secret}"},
                 timeout=5,
             )
-            
+            if response.status_code >= 400:
+                print(f"[sentryloop_trigger] investigate call rejected: "
+                      f"{response.status_code} {response.text}")
+            else:
+                print(f"[sentryloop_trigger] investigation fired: {response.json()}")
         except Exception as e:
             print(f"[sentryloop_trigger] failed to reach sentryloop: {e}")
 
