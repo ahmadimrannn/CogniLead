@@ -3,10 +3,10 @@ import traceback
 import psycopg
 import os
 from dotenv import load_dotenv
+load_dotenv()
 
 from automated_sentryloop_trigger.sentryloop_trigger import maybe_trigger_investigation
 
-load_dotenv()
 
 DB_DSN = os.getenv("DB_URI_FOR_LOGS")
 
