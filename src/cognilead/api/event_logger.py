@@ -4,6 +4,8 @@ import psycopg
 import os
 from dotenv import load_dotenv
 
+from automated_sentryloop_trigger.sentryloop_trigger import maybe_trigger_investigation
+
 load_dotenv()
 
 DB_DSN = os.getenv("DB_URI_FOR_LOGS")
@@ -16,17 +18,18 @@ def log_event(service: str, event_type: str, message: str,
       return
 
     try:
-      with psycopg.connect(DB_DSN) as conn:
-        with conn, conn.cursor() as cur:
-          cur.execute(
-            """
-            INSERT INTO events (service, event_type, severity, node_or_route,
-                                  thread_id, message, context, source)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, 'app_shim')
-            """,
-            (service, event_type, severity, node_or_route, thread_id,
-              message, json.dumps(context or {}))
-        )
-      conn.close()
+        with psycopg.connect(DB_DSN) as conn:
+            with conn, conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO events (service, event_type, severity, node_or_route,
+                                        thread_id, message, context, source)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, 'app_shim')
+                    """,
+                    (service, event_type, severity, node_or_route, thread_id,
+                    message, json.dumps(context or {}))
+                )
+            maybe_trigger_investigation(conn, service, severity, node_or_route)    
+        conn.close()
     except Exception:
-      print(f"[events_logger] failed to log event: {traceback.format_exc()}")
+        print(f"[events_logger] failed to log event: {traceback.format_exc()}")
